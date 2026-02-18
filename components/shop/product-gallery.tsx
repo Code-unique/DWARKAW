@@ -1,7 +1,7 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 interface ProductGalleryProps {
@@ -10,31 +10,47 @@ interface ProductGalleryProps {
 }
 
 export function ProductGallery({ images, name }: ProductGalleryProps) {
-  const [selected, setSelected] = useState(0)
+  const [selectedImage, setSelectedImage] = useState(0)
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="aspect-[3/4] bg-muted flex items-center justify-center">
+        <span className="text-muted-foreground text-sm">No image available</span>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Main image */}
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <Image
-          src={images[selected] || "/images/hero.jpg"}
-          alt={name}
+          src={images[selectedImage]}
+          alt={`${name} - View ${selectedImage + 1}`}
           fill
           className="object-cover"
           priority
         />
       </div>
+
+      {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="flex gap-3">
-          {images.map((img, i) => (
+        <div className="grid grid-cols-4 gap-4">
+          {images.map((image, index) => (
             <button
-              key={i}
-              onClick={() => setSelected(i)}
+              key={index}
+              onClick={() => setSelectedImage(index)}
               className={cn(
-                "relative h-20 w-20 overflow-hidden border-2 transition-colors",
-                i === selected ? "border-primary" : "border-transparent opacity-60 hover:opacity-100"
+                "relative aspect-[3/4] overflow-hidden bg-muted border-2 transition-colors",
+                selectedImage === index ? "border-foreground" : "border-transparent hover:border-foreground/30"
               )}
             >
-              <Image src={img} alt={`${name} view ${i + 1}`} fill className="object-cover" />
+              <Image
+                src={image}
+                alt={`${name} - Thumbnail ${index + 1}`}
+                fill
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

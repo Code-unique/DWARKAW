@@ -20,7 +20,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const { items, totalNPR, totalUSD, clearCart } = useCart()
   const { currency } = useCurrency()
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const [loading, setLoading] = useState(false)
 
   const total = currency === "NPR" ? totalNPR : totalUSD
@@ -35,6 +35,25 @@ export default function CheckoutPage() {
     phone: "",
   })
 
+  // Check if user is loaded
+  if (!isLoaded) {
+    return (
+      <main>
+        <Navbar />
+        <div className="pt-24 pb-12 flex items-center justify-center">
+          <div className="h-8 w-8 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
+  // Redirect to sign in if not authenticated
+  if (!user) {
+    router.push("/sign-in?redirect=/checkout")
+    return null
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
@@ -45,7 +64,9 @@ export default function CheckoutPage() {
 
     setLoading(true)
     try {
-      await createOrder({
+      console.log("Submitting order for user:", user.id)
+      
+      const orderData = {
         items: items.map((item) => ({
           productId: item.productId,
           name: item.name,
@@ -69,11 +90,18 @@ export default function CheckoutPage() {
           postalCode: form.postalCode,
           phone: form.phone,
         },
-      })
+      }
+      
+      console.log("Order data:", orderData)
+      
+      const result = await createOrder(orderData)
+      console.log("Order result:", result)
+      
       clearCart()
       toast.success("Order placed successfully!")
       router.push("/orders")
-    } catch {
+    } catch (error) {
+      console.error("Order submission error:", error)
       toast.error("Failed to place order. Please try again.")
     } finally {
       setLoading(false)
@@ -119,7 +147,7 @@ export default function CheckoutPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-              {/* Shipping form */}
+              {/* Shipping form - same as before */}
               <div className="lg:col-span-2 flex flex-col gap-6">
                 <h2 className="text-xs tracking-wider uppercase text-muted-foreground">
                   Shipping Information

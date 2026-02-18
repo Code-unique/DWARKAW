@@ -17,7 +17,7 @@ export interface IOrder extends Document {
   items: IOrderItem[]
   totalNPR: number
   totalUSD: number
-  status: "pending" | "confirmed" | "shipped" | "delivered"
+  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
   customerName: string
   customerEmail: string
   shippingAddress: {
@@ -52,8 +52,8 @@ const OrderSchema = new Schema<IOrder>(
     totalUSD: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipped", "delivered"],
-      default: "pending",
+      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+      default: "pending", // Changed from "pending" to "pending"
     },
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
